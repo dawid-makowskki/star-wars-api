@@ -57,12 +57,31 @@ describe('AppController', () => {
     });
   });
 
-  describe('pagination', () => {
+  describe('pagination and filter', () => {
     it('should return correct paginated response with two items', async () => {
       const response = await apiController.getAllFilms({}, 2);
       expect(response.pages).toBe(3);
       expect(response.page).toBe(2);
       expect(response.data.length).toBe(2);
+    });
+
+    it('should return species with eye_colors yellow', async () => {
+      const response = await apiController.getAllSpecies(
+        { eye_colors: 'yellow' },
+        0,
+      );
+
+      expect(
+        response.data.every((species) => species.eye_colors.includes('yellow')),
+      ).toBeTruthy();
+    });
+
+    it('should return no data for incorrect query', async () => {
+      const response = await apiController.getAllPlanets(
+        { name: 'randomstringnowaythereisaplanetwiththatname' },
+        0,
+      );
+      expect(response.data.length).toBe(0);
     });
   });
 });

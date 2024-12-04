@@ -87,3 +87,16 @@ export type Planet = {
   films: Array<string>;
   url: Array<string>;
 };
+
+export type PaginatedResource<T> = {
+  page: number;
+  pages: number;
+  data: Array<T>;
+};
+
+export type SwapiResource<T> = {
+  couunt: number;
+  next: string | null;
+  previous: string | null;
+  results: Array<T>;
+};

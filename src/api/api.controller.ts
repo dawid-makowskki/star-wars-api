@@ -1,5 +1,12 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { Film, Planet, Species, Starship, Vehicle } from 'src/types/types';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  Film,
+  PaginatedResource,
+  Planet,
+  Species,
+  Starship,
+  Vehicle,
+} from 'src/types/types';
 import { ApiService } from './api.service';
 
 @Controller('api')
@@ -12,52 +19,67 @@ export class ApiController {
   }
 
   @Get('/films')
-  getAllFilms(): Promise<Array<Film>> {
-    return this.apiService.findAllFilms();
+  getAllFilms(
+    @Query() query: Record<string, string>,
+    @Query('page') page = 0,
+  ): Promise<PaginatedResource<Film>> {
+    return this.apiService.findAll('films', query, page);
+  }
+
+  @Get('/vehicles')
+  getAllVehicles(
+    @Query() query: Record<string, string>,
+    @Query('page') page = 0,
+  ): Promise<PaginatedResource<Vehicle>> {
+    return this.apiService.findAll('vehicles', query, page);
+  }
+
+  @Get('/starships')
+  getAllStarships(
+    @Query() query: Record<string, string>,
+    @Query('page') page = 0,
+  ): Promise<PaginatedResource<Starship>> {
+    return this.apiService.findAll('starships', query, page);
+  }
+
+  @Get('/planets')
+  getAllPlanets(
+    @Query() query: Record<string, string>,
+    @Query('page') page = 0,
+  ): Promise<PaginatedResource<Planet>> {
+    return this.apiService.findAll('planets', query, page);
+  }
+
+  @Get('/species')
+  getAllSpecies(
+    @Query() query: Record<string, string>,
+    @Query('page') page = 0,
+  ): Promise<PaginatedResource<Species>> {
+    return this.apiService.findAll('species', query, page);
   }
 
   @Get('/films/:id')
   getFilm(@Param('id') id: string): Promise<Film> {
-    return this.apiService.findFilm(id);
-  }
-
-  @Get('/species')
-  getAllSpecies(): Promise<Array<Species>> {
-    return this.apiService.findAllSpecies();
-  }
-
-  @Get('/species/:id')
-  getSpecies(@Param('id') id: string): Promise<Species> {
-    return this.apiService.findSpecies(id);
-  }
-
-  @Get('/vehicles')
-  getAllVehicles(): Promise<Array<Vehicle>> {
-    return this.apiService.findAllVehicles();
+    return this.apiService.findOne('films', id);
   }
 
   @Get('/vehicles/:id')
   getVehicle(@Param('id') id: string): Promise<Vehicle> {
-    return this.apiService.findVehicle(id);
-  }
-
-  @Get('/starships')
-  getAllStarships(): Promise<Array<Starship>> {
-    return this.apiService.findAllStarships();
-  }
-
-  @Get('/starships/:id')
-  getStarship(@Param('id') id: string): Promise<Starship> {
-    return this.apiService.findStarship(id);
-  }
-
-  @Get('/planets')
-  getAllPlanets(): Promise<Array<Planet>> {
-    return this.apiService.findAllPlanets();
+    return this.apiService.findOne('vehicles', id);
   }
 
   @Get('/planets/:id')
   getPlanet(@Param('id') id: string): Promise<Planet> {
-    return this.apiService.findPlanet(id);
+    return this.apiService.findOne('planets', id);
+  }
+
+  @Get('/starships/:id')
+  getStarship(@Param('id') id: string): Promise<Starship> {
+    return this.apiService.findOne('starships', id);
+  }
+
+  @Get('/species/:id')
+  getSpecies(@Param('id') id: string): Promise<Species> {
+    return this.apiService.findOne('species', id);
   }
 }

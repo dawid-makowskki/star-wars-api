@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { $Fetch, ofetch } from 'ofetch';
-import { Film, Planet, Species, Starship, Vehicle } from 'src/types/types';
+import { PaginatedResource, SwapiResource } from 'src/types/types';
 
 @Injectable()
 export class ApiService {
@@ -14,83 +14,55 @@ export class ApiService {
     this.swapi = ofetch.create({ baseURL: 'https://swapi.dev/api' });
   }
 
-  async findAllFilms(): Promise<Array<Film>> {
+  async findAll<T>(
+    endpoint: string,
+    query: Record<string, string>,
+    page: number,
+  ): Promise<PaginatedResource<T>> {
     try {
-      return (await this.swapi('/films')) as Array<Film>;
+      const swapiResponse = (await this.swapi(endpoint)) as SwapiResource<T>;
+      return this.resourceFilter(swapiResponse.results, page, query);
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
 
-  async findFilm(id: string): Promise<Film> {
+  async findOne<T>(endpoint: string, id: string): Promise<T> {
     try {
-      return (await this.swapi(`/films/${id}`)) as Film;
+      return (await this.swapi(`/${endpoint}/${id}`)) as T;
     } catch (error) {
       throw new NotFoundException(error);
     }
   }
 
-  async findAllSpecies(): Promise<Array<Species>> {
-    try {
-      return (await this.swapi(`/species`)) as Array<Species>;
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
-  }
+  private resourceFilter<T>(
+    data: Array<T>,
+    page: number,
+    query: Record<string, string>,
+  ): PaginatedResource<T> {
+    let filteredResults = data.filter((result) => {
+      return Object.entries(query).every(([key, val]) => {
+        if (key === 'page') return true;
+        return (
+          result[key]?.toLowerCase() === val.toLowerCase() ||
+          result[key]?.toLowerCase().includes(val.toLowerCase())
+        );
+      });
+    });
+    const pageLength = 2;
 
-  async findSpecies(id: string): Promise<Species> {
-    try {
-      return (await this.swapi(`/species/${id}`)) as Species;
-    } catch (error) {
-      throw new NotFoundException(error);
-    }
-  }
+    const pages = Math.round(filteredResults.length / pageLength);
 
-  async findAllVehicles(): Promise<Array<Vehicle>> {
-    try {
-      return (await this.swapi(`/vehicles`)) as Array<Vehicle>;
-    } catch (error) {
-      throw new BadRequestException(error);
+    if (page > 0) {
+      const start = (page - 1) * pageLength;
+      const end = start + pageLength;
+      filteredResults = filteredResults.slice(start, end);
     }
-  }
 
-  async findVehicle(id: string): Promise<Vehicle> {
-    try {
-      return (await this.swapi(`/vehicles/${id}`)) as Vehicle;
-    } catch (error) {
-      throw new NotFoundException(error);
-    }
-  }
-
-  async findAllStarships(): Promise<Array<Starship>> {
-    try {
-      return (await this.swapi(`/starships`)) as Array<Starship>;
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
-  }
-
-  async findStarship(id: string): Promise<Starship> {
-    try {
-      return (await this.swapi(`/starships/${id}`)) as Starship;
-    } catch (error) {
-      throw new NotFoundException(error);
-    }
-  }
-
-  async findAllPlanets(): Promise<Array<Planet>> {
-    try {
-      return (await this.swapi(`/planets`)) as Array<Planet>;
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
-  }
-
-  async findPlanet(id: string): Promise<Planet> {
-    try {
-      return (await this.swapi(`/planets/${id}`)) as Planet;
-    } catch (error) {
-      throw new NotFoundException(error);
-    }
+    return {
+      page,
+      pages,
+      data: filteredResults,
+    };
   }
 }

@@ -13,8 +13,8 @@ describe('AppController', () => {
   beforeEach(async () => {
     swapiServiceMock = {
       fetchMany: jest.fn().mockResolvedValue(getFilmsResponse),
-      fetchOne: jest.fn().mockResolvedValue(getFilmResponse)
-    }
+      fetchOne: jest.fn().mockResolvedValue(getFilmResponse),
+    };
 
     const app: TestingModule = await Test.createTestingModule({
       imports: [
@@ -24,7 +24,11 @@ describe('AppController', () => {
         }),
       ],
       controllers: [ApiController],
-      providers: [ApiService, {provide: SwapiService, useValue: swapiServiceMock}, WordFinderService],
+      providers: [
+        ApiService,
+        { provide: SwapiService, useValue: swapiServiceMock },
+        WordFinderService,
+      ],
     }).compile();
 
     apiController = app.get<ApiController>(ApiController);
@@ -82,10 +86,7 @@ describe('AppController', () => {
     });
 
     it('should return films produced by Gary', async () => {
-      const response = await apiController.getAllFilms(
-        { producer: 'Gary' },
-        0,
-      );
+      const response = await apiController.getAllFilms({ producer: 'Gary' }, 0);
 
       expect(
         response.data.every((film) => film.producer.includes('Gary')),

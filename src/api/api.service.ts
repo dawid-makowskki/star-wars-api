@@ -7,13 +7,15 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { SwapiService } from '../swapi/swapi.service';
-import { PaginatedResource, SwapiResource } from 'src/types/types';
+import { Film, PaginatedResource, Person, SwapiResource } from 'src/types/types';
+import { WordFinderService } from '../word-finder/word-finder.service';
 
 @Injectable()
 export class ApiService {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private readonly swapiService: SwapiService
+    private readonly swapiService: SwapiService,
+    private readonly wordFinderService: WordFinderService,
   ) {}
 
   async findAll<T>(
@@ -67,6 +69,30 @@ export class ApiService {
     }
   }
 
+  async findUniqueWordsCount(): Promise<Array<[string, number]>> {
+    try {
+      const filmsResponse = await this.findAll<Film>('films', {}, 0);
+      const crawls = filmsResponse.data.map(film => film.opening_crawl);
+      const result = this.wordFinderService.getUniqueWordsCount(crawls);
+      return result;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findMostFrequentCharacterName(): Promise<string | Array<string>> {
+    try {
+      const filmsResponse = await this.findAll<Film>('films', {}, 0);
+      const crawls = filmsResponse.data.map(film => film.opening_crawl);
+      const names = await this.findAllPeopleNames();
+
+      this.wordFinderService.getMostFrequentCharacterName(crawls, names);
+      return 'dsadsa';
+    } catch {
+      throw new BadRequestException('Could not find most frequent character name');
+    }
+  }
+
   private resourceFilter<T>(
     data: Array<T>,
     page: number,
@@ -98,7 +124,7 @@ export class ApiService {
     };
   }
 
-  private async getFromCache(key: string): Promise<unknown> {
+  private async getFromCache<T>(key: string): Promise<T | undefined> {
     try {
       return await this.cacheManager.get(key);
     } catch (error) {
@@ -134,5 +160,10 @@ export class ApiService {
       .join('_');
 
     return `${endpoint}${serializedParams}${serializedQuery}`;
+  }
+
+  private async findAllPeopleNames(): Promise<Array<string>> {
+    const peopleResponse = await this.findAll<Person>('people', {}, 0);
+    return  peopleResponse.data.map((person) => person.name);
   }
 }

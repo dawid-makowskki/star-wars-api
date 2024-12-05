@@ -82,4 +82,14 @@ export class ApiController {
   getSpecies(@Param('id') id: string): Promise<Species> {
     return this.apiService.findOne('species', id);
   }
+
+  @Get('/unique-words-count')
+  async getUniqueWordsCount(): Promise<Array<[string, number]>> {
+    return this.apiService.findUniqueWordsCount();
+  }
+
+  @Get('/most-frequent-character-name')
+  async getMostFrequentCharacterName(): Promise<string | Array<string>> {
+    return this.apiService.findMostFrequentCharacterName();
+  }
 }

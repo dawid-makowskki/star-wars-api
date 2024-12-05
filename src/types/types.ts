@@ -88,6 +88,10 @@ export type Planet = {
   url: Array<string>;
 };
 
+export type Person = {
+  name: string;
+};
+
 export type PaginatedResource<T> = {
   page: number;
   pages: number;

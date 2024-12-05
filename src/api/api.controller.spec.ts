@@ -4,6 +4,7 @@ import { ApiController } from './api.controller';
 import { CacheModule } from '@nestjs/cache-manager';
 import { SwapiService } from '../swapi/swapi.service';
 import { getFilmResponse, getFilmsResponse } from '../mocks';
+import { WordFinderService } from '../word-finder/word-finder.service';
 
 describe('AppController', () => {
   let apiController: ApiController;
@@ -23,7 +24,7 @@ describe('AppController', () => {
         }),
       ],
       controllers: [ApiController],
-      providers: [ApiService, {provide: SwapiService, useValue: swapiServiceMock}],
+      providers: [ApiService, {provide: SwapiService, useValue: swapiServiceMock}, WordFinderService],
     }).compile();
 
     apiController = app.get<ApiController>(ApiController);

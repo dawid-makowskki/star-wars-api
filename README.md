@@ -1,99 +1,95 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Star-wars swapi app
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Simple application written in TypeScript using NestJS framework.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## How to run
+Make sure you have Docker and Docker Compose installed on your machine.
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
+Run
 ```bash
+# build docker
+$ docker-compose build
+
+# run docker image
+$ docker-compose up
+```
+
+## Development
+Make sure you have pnpm installed
+```bash
+# install dependencies
 $ pnpm install
+
+# run project in development mode
+$ pnpm start:dev 
 ```
 
-## Compile and run the project
+## API Documentation
 
-```bash
-# development
-$ pnpm run start
+### Available collection endpoints
+`/api/films`
+`/api/vehicles`
+`/api/species`
+`/api/starships`
+`/api/planets`
 
-# watch mode
-$ pnpm run start:dev
+Collection endpoints return `PaginatedResource<T>` type:
+```ts
+type PaginatedResource<T> = {
+	page: number;
+	pages: number;
+	data: Array<T>;
+}
+```
+where `page` is current page, `pages` is total number of pages for given resource and `data` is list of items
 
-# production mode
-$ pnpm run start:prod
+
+Each collection endpoint can be filtered using query params e.g.
+`/api/films?director=Lucas&producer=Gary`
+
+Each collection endpoint can be paginated using `page` query param e.g.
+`/api/films?page=2`, where page contains at most 2 items.
+
+When `page` query param is not provided, `page` in response will equal `0`
+
+### Available single resource endpoint
+`/api/films/:id`
+`/api/vehicles/:id`
+`/api/species/:id`
+`/api/starships/:id`
+`/api/planets/:id`
+
+Single resource endpoints return single item of type `T`
+
+### Counting endpoints
+`/api/unique-words-count`
+
+Returns array of pairs of unique words from all films openings.
+```ts
+type UniqueWordsCountResponse = Array<[string, number]>
 ```
 
-## Run tests
+`/api/most-frequent-character-name`
 
-```bash
-# unit tests
-$ pnpm run test
+Returns most used character name across all films openings, if multiple character names are used the same amount of time, return array of names.
 
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+```ts
+type MostFrequentCharacterNameResponse = string | Array<string>
 ```
 
-## Deployment
+## Some design decisions explained
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+1. Usage of NestJS
+NestJS was mentioned as prefered framework of choise for this tasks and I have the most experience working with backends written in it.
+2. Using in-memory cache for caching
+Although it is mentioned that for chaching I should use SQL or noSQL database, I made decision to stick with in-memory cache (which we can consider to be noSQL in-memory database) because it will have the best response times and the amount of data in `swapi` API is small enought to not be worried about used memory.
+3. Single controller for whole API
+I decided to create single controller class for entire API as the amount of endpoint is very small and endpoints are similar to each other. 
+4. `swapi` API in its own service
+This decision was made because the API is very slow and sometimes throws timeouts in busy hours. That makes tests unreliable and unpredictable. Extracting external API calls to separate service make it easier to mock it in testing.
+5. `WordFinderService`
+It may seems that there is no that much logic in this service but extracting it to its own service made it very easy to test just the business logic and not unnecessary API calls.
+6. Usage of `ofetch`
+NestJS provice `http-module` but it uses `Axios` under the hood which is quite old and still use `XMLHttpRequest`. I decided to use `ofetch` library which works in both browser and Node environments. It is well tested and is used as a building block of `Nuxt` framework.
+7. Documentation in README
+Considering the scale of the project, I decided that external website/swagger won't provide additional value but will be another part of the app to maintain. 

@@ -86,8 +86,8 @@ export class ApiService {
       const crawls = filmsResponse.data.map(film => film.opening_crawl);
       const names = await this.findAllPeopleNames();
 
-      this.wordFinderService.getMostFrequentCharacterName(crawls, names);
-      return 'dsadsa';
+      const result = this.wordFinderService.getMostFrequentCharacterName(crawls, names);
+      return result;
     } catch {
       throw new BadRequestException('Could not find most frequent character name');
     }

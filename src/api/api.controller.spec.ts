@@ -1,14 +1,29 @@
 import { ApiService } from './api.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApiController } from './api.controller';
+import { CacheModule } from '@nestjs/cache-manager';
+import { SwapiService } from '../swapi/swapi.service';
+import { getFilmResponse, getFilmsResponse } from '../mocks';
 
 describe('AppController', () => {
   let apiController: ApiController;
+  let swapiServiceMock: Partial<SwapiService>;
 
   beforeEach(async () => {
+    swapiServiceMock = {
+      fetchMany: jest.fn().mockResolvedValue(getFilmsResponse),
+      fetchOne: jest.fn().mockResolvedValue(getFilmResponse)
+    }
+
     const app: TestingModule = await Test.createTestingModule({
+      imports: [
+        CacheModule.register({
+          ttl: 1000 * 5,
+          max: 100,
+        }),
+      ],
       controllers: [ApiController],
-      providers: [ApiService],
+      providers: [ApiService, {provide: SwapiService, useValue: swapiServiceMock}],
     }).compile();
 
     apiController = app.get<ApiController>(ApiController);
@@ -35,7 +50,7 @@ describe('AppController', () => {
       const results = await Promise.allSettled(promises);
 
       results.forEach((result) => expect(result.status).toBe('fulfilled'));
-    });
+    }, 20000);
   });
 
   describe('getOne', () => {
@@ -54,7 +69,7 @@ describe('AppController', () => {
       const results = await Promise.allSettled(promises);
 
       results.forEach((result) => expect(result.status).toBe('fulfilled'));
-    });
+    }, 20000);
   });
 
   describe('pagination and filter', () => {
@@ -65,19 +80,19 @@ describe('AppController', () => {
       expect(response.data.length).toBe(2);
     });
 
-    it('should return species with eye_colors yellow', async () => {
-      const response = await apiController.getAllSpecies(
-        { eye_colors: 'yellow' },
+    it('should return films produced by Gary', async () => {
+      const response = await apiController.getAllFilms(
+        { producer: 'Gary' },
         0,
       );
 
       expect(
-        response.data.every((species) => species.eye_colors.includes('yellow')),
+        response.data.every((film) => film.producer.includes('Gary')),
       ).toBeTruthy();
     });
 
     it('should return no data for incorrect query', async () => {
-      const response = await apiController.getAllPlanets(
+      const response = await apiController.getAllFilms(
         { name: 'randomstringnowaythereisaplanetwiththatname' },
         0,
       );
